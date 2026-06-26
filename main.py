@@ -2,7 +2,7 @@ from fastapi import FastAPI, Path,HTTPException,Query
 import json
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field , computed_field
-from typing import Annotated, Literal
+from typing import Annotated, Literal,Optional
 
 app = FastAPI()
 
@@ -18,7 +18,7 @@ class Patients(BaseModel):
     @computed_field
     @property
     def bmi(self)->float:
-        bmi=(self.weight/(self.height**2),2)
+        bmi=round(self.weight/(self.height**2),2)
         return bmi
     
     @computed_field
@@ -33,8 +33,15 @@ class Patients(BaseModel):
             return 'Normal'
         else:
             return 'Obese'
-        
 
+        
+class Patient_update(BaseModel):
+    name:Annotated[Optional[str],Field(default=None)]
+    city:Annotated[Optional[str],Field(default=None)]
+    age:Annotated[Optional[int],Field(default=None,gt=0)]
+    gender:Annotated[Optional[Literal['male','female','other']],Field(default=None)]
+    height:Annotated[Optional[str],Field(default=None,gt=0)]
+    weight:Annotated[Optional[str],Field(default=None,gt=0)]
 
 
 
@@ -90,7 +97,7 @@ def sort_patients(sort_by:str = Query(...,description='sort the patients on the 
 @app.post('/create')
 def create_patients(patient:Patients):
     #load data
-    data=load_data
+    data=load_data()
     #check if the data already exists
     if patient.id in data:
         raise HTTPException(status_code=400,detail='Patient already exist')

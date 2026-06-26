@@ -109,3 +109,27 @@ def create_patients(patient:Patients):
     save_data(data)
 
     return JSONResponse(status_code=201,content={'message':'Patient is created sucessfully'})
+
+
+@app.put('/edit/{patient_id}')
+def edit_patient(patient_id:str,patient_update:Patient_update):
+    #load data
+    data=load_data
+    if patient_id not in data:
+        raise HTTPException(status_code='404',content='This Patient id is not available')
+    
+    existing_patient_info=data[patient_id]
+    updated_patient_info=patient_update.model_dump(exclude_unset=True)
+    for key , value in updated_patient_info.items():
+        existing_patient_info[key]=value
+    
+    existing_patient_info['id']=patient_id
+    patient_pydantic_object=Patients(**existing_patient_info)
+    #pyd object to dictionary
+    existing_patient_info=patient_pydantic_object.model_dump(exclude='id')
+
+    data[patient_id]=existing_patient_info
+
+    save_data(data)
+
+    return JSONResponse (status_code='201',content='Your patient Updates are done')

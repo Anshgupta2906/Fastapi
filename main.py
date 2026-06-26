@@ -114,9 +114,9 @@ def create_patients(patient:Patients):
 @app.put('/edit/{patient_id}')
 def edit_patient(patient_id:str,patient_update:Patient_update):
     #load data
-    data=load_data
+    data=load_data()
     if patient_id not in data:
-        raise HTTPException(status_code='404',content='This Patient id is not available')
+        raise HTTPException(status_code=404,content='This Patient id is not available')
     
     existing_patient_info=data[patient_id]
     updated_patient_info=patient_update.model_dump(exclude_unset=True)
@@ -132,4 +132,17 @@ def edit_patient(patient_id:str,patient_update:Patient_update):
 
     save_data(data)
 
-    return JSONResponse (status_code='201',content='Your patient Updates are done')
+    return JSONResponse (status_code=201,content='Your patient Updates are done')
+
+@app.delete('/delete/{patient_id}')
+def delete_pateint(patient_id:str):
+    data=load_data()
+
+    if patient_id not in data:
+        raise HTTPException (status_code=404, detail='This patient id is not in data')
+    
+    del data[patient_id]
+
+    save_data(data)
+
+    return JSONResponse(status_code=200,content="you have sucessfully deleted")
